@@ -37,7 +37,7 @@ PromptMind is a privacy-friendly, locally running AI knowledge base. It leverage
     poetry run python scripts/index.py
     ```
 
-    (by default the documents in `docs` will be read. But you can specify a different folder as a parameter.)
+    (by default the documents in `docs` will be read. But you can specify different folder, files and even URLs as a parameter.)
 
 3. Run the query app:
 

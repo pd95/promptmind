@@ -7,6 +7,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from pypdf import PdfReader
+from langchain_community.document_loaders import WebBaseLoader
 
 def load_pdf_text(path: str) -> str:
     reader = PdfReader(path)
@@ -38,6 +39,15 @@ def load_all_texts(folder_path: str):
             all_texts.append(content)
     return all_texts
 
+def load_url(url: str) -> list[Document]:
+    print("  downloading from URL", url)
+    docs = WebBaseLoader(url).load()
+
+    # Workaround because currently we can only handle text and not documents!
+    docs_list = "\n\n".join(item.page_content for item in docs)
+    return (url, docs_list)
+
+
 def chunk_text(text: str, chunk_size=600, overlap=100):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
@@ -57,6 +67,8 @@ for doc_src in doc_sources:
         all_texts = load_all_texts(doc_src)
     elif os.path.isfile(doc_src):
         all_texts.append(load_file(doc_src, doc_src))
+    elif doc_src.startswith("http://") or doc_src.startswith("https://"):
+        all_texts.append(load_url(doc_src))
 
     for filename, text in all_texts:
         chunks = chunk_text(text)
