@@ -17,7 +17,8 @@ db = FAISS.load_local("vector_store", embedding, allow_dangerous_deserialization
 
 def retrieve_documents(query: str, top: int = 10):
     docs = db.similarity_search(query, k=top)
-    print("search_knowledge_base executed, returning num_docs=", len(docs))
+    sources = {doc.metadata.get("source") for doc in docs if "source" in doc.metadata}
+    print("search_knowledge_base executed, found ", len(docs), "fragments from", sources)
     return (doc.page_content for doc in docs)
 
 def generate_rag_response(query: str):
