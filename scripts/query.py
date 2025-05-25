@@ -24,8 +24,15 @@ def retrieve_documents(query: str, top: int = 10):
 def generate_rag_response(query: str):
     docs = retrieve_documents(query)
     context = "\n---\n".join(docs)
-    prompt = f"""You are a helpful assistant. Use only the following context to answer the question. If the answer isn't in the context, say 'I don't know'.
-    Context: {context} Question: {query} Answer:"""
+    prompt = f"""You are a helpful assistant. 
+    Use only the following context to answer the question. 
+    If the answer isn't in the context, say 'I don't know'.
+    
+    Context: {context}
+    
+    Question: {query} 
+    
+    Answer:"""
     llm = ChatOllama(model=model, temperature=0)
     response = llm.invoke([HumanMessage(content=prompt)])
     return response.content
