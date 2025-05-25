@@ -1,0 +1,8 @@
+.vscode/
+.DS_Store
+
+docs/*
+!docs/.gitkeep
+
+vector_store/*
+!vector_store/.gitkeep
