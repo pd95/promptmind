@@ -27,7 +27,7 @@ def generate_rag_response(query: str):
     prompt = f"""You are a helpful assistant. Use only the following context to answer the question. If the answer isn't in the context, say 'I don't know'.
     Context: {context} Question: {query} Answer:"""
     llm = ChatOllama(model=model, temperature=0)
-    response = llm([HumanMessage(content=prompt)])
+    response = llm.invoke([HumanMessage(content=prompt)])
     return response.content
 
 answer = generate_rag_response(user_query)
