@@ -1,7 +1,6 @@
-# This python script is producing the vector store based on the PDF files in the documents folder
+# This python script is producing the vector store based on the PDF files in the "docs" folder
 
 import os
-import re
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
