@@ -12,14 +12,31 @@ def load_pdf_text(path: str) -> str:
     reader = PdfReader(path)
     return "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
 
-def load_all_pdfs_texts(folder_path: str):
-    pdf_texts = []
+def load_file(path: str, filename: str) -> str:
+    if filename.lower().endswith(".pdf"):
+        # read PDF from path
+        print("  reading PDF", path)
+        return (path, load_pdf_text(path))
+    elif filename.lower().endswith(".md"):
+        # read plain content from path
+        print("  reading Markdown", path)
+        with open(path, "r", encoding="utf-8") as f:
+            return (path, f.read())
+    elif filename.lower().endswith(".txt"):
+        # read plain text content from path
+        print("  reading Text", path)
+        with open(path, "r", encoding="utf-8") as f:
+            return (path, f.read())
+    return None
+
+def load_all_texts(folder_path: str):
+    all_texts = []
     for filename in os.listdir(folder_path):
-        if filename.lower().endswith(".pdf"):
-            path = os.path.join(folder_path, filename)
-            print("  reading", path)
-            pdf_texts.append((filename, load_pdf_text(path)))
-    return pdf_texts
+        file_path = os.path.join(folder_path, filename)
+        content = load_file(file_path, filename)
+        if content:
+            all_texts.append(content)
+    return all_texts
 
 def chunk_text(text: str, chunk_size=600, overlap=100):
     splitter = RecursiveCharacterTextSplitter(
@@ -33,13 +50,24 @@ def chunk_text(text: str, chunk_size=600, overlap=100):
 doc_sources = sys.argv[1::] if len(sys.argv) > 1 else ["docs"]
 all_documents = []
 for doc_src in doc_sources:
-    print("importing from", doc_src)
-    pdf_texts = load_all_pdfs_texts(doc_src)
-    for filename, text in pdf_texts:
+
+    all_texts = []
+    if os.path.isdir(doc_src):
+        print("importing from", doc_src)
+        all_texts = load_all_texts(doc_src)
+    elif os.path.isfile(doc_src):
+        all_texts.append(load_file(doc_src, doc_src))
+
+    for filename, text in all_texts:
         chunks = chunk_text(text)
         # Add metadata={'source': filename} to each Document
         doc_chunks = [Document(page_content=chunk, metadata={'source': filename}) for chunk in chunks]
         all_documents.extend(doc_chunks)
+
+# Ensure data has been loaded
+if not all_documents:
+    print("No documents found. Exiting.")
+    sys.exit(1)
 
 # Use high-quality sentence transformer embeddings
 print("Initializing embedding model")
