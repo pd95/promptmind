@@ -1,5 +1,6 @@
 # This python script is producing the vector store based on the PDF files in the "docs" folder
 
+import sys
 import os
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -16,6 +17,7 @@ def load_all_pdfs_texts(folder_path: str):
     for filename in os.listdir(folder_path):
         if filename.lower().endswith(".pdf"):
             path = os.path.join(folder_path, filename)
+            print("  reading", path)
             pdf_texts.append((filename, load_pdf_text(path)))
     return pdf_texts
 
@@ -27,19 +29,23 @@ def chunk_text(text: str, chunk_size=600, overlap=100):
     )
     return splitter.split_text(text)
 
-# Load and split text
-documents_folder = "docs"
-pdf_texts = load_all_pdfs_texts(documents_folder)
+
+doc_sources = sys.argv[1::] if len(sys.argv) > 1 else ["docs"]
 all_documents = []
-for filename, text in pdf_texts:
-    print(filename)
-    chunks = chunk_text(text)
-    # Add metadata={'source': filename} to each Document
-    all_documents.extend([Document(page_content=chunk, metadata={'source': filename}) for chunk in chunks])
+for doc_src in doc_sources:
+    print("importing from", doc_src)
+    pdf_texts = load_all_pdfs_texts(doc_src)
+    for filename, text in pdf_texts:
+        chunks = chunk_text(text)
+        # Add metadata={'source': filename} to each Document
+        doc_chunks = [Document(page_content=chunk, metadata={'source': filename}) for chunk in chunks]
+        all_documents.extend(doc_chunks)
 
 # Use high-quality sentence transformer embeddings
+print("Initializing embedding model")
 embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 # Build the FAISS vector store
+print("Embedding ", len(all_documents), "chunks")
 db = FAISS.from_documents(all_documents, embedding)
 db.save_local("vector_store/")

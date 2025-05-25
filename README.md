@@ -25,7 +25,7 @@ PromptMind is a privacy-friendly, locally running AI knowledge base. It leverage
     poetry install
     ```
 
-3. Ensure Ollama is running locally.
+3. Ensure Ollama is running locally and [Phi-4-mini](https://ollama.com/library/phi4-mini) is already downloaded (e.g. running `ollama pull phi4-mini`)
 
 ### Usage
 
@@ -37,11 +37,15 @@ PromptMind is a privacy-friendly, locally running AI knowledge base. It leverage
     poetry run python scripts/index.py
     ```
 
+    (by default the documents in `docs` will be read. But you can specify a different folder as a parameter.)
+
 3. Run the query app:
 
     ```bash
     poetry run python scripts/query.py "What is this project about?"
     ```
+
+    (by default the model "phi4-mini" will be used, but you can specify a different model as additional parameter)
 
 4. The system will retrieve relevant information using FAISS and generate responses with your local LLM via Ollama.
 
