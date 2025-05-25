@@ -13,73 +13,72 @@ def load_pdf_text(path: str) -> str:
     reader = PdfReader(path)
     return "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
 
-def load_file(path: str, filename: str) -> str:
+def load_file(path: str, filename: str) -> Document:
     if filename.lower().endswith(".pdf"):
         # read PDF from path
         print("  reading PDF", path)
-        return (path, load_pdf_text(path))
+        # Workaround: We should not return "plain text" in load_pdf_text and wrap it again as a document
+        return Document(page_content=load_pdf_text(path), metadata={"source": path})
     elif filename.lower().endswith(".md"):
         # read plain content from path
         print("  reading Markdown", path)
         with open(path, "r", encoding="utf-8") as f:
-            return (path, f.read())
+            content = f.read()
+        return Document(page_content=content, metadata={"source": path})
     elif filename.lower().endswith(".txt"):
         # read plain text content from path
         print("  reading Text", path)
         with open(path, "r", encoding="utf-8") as f:
-            return (path, f.read())
+            content = f.read()
+        return Document(page_content=content, metadata={"source": path})
     return None
 
-def load_all_texts(folder_path: str):
-    all_texts = []
+def load_all_texts(folder_path: str) -> list[Document]:
+    all_docs = []
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         content = load_file(file_path, filename)
         if content:
-            all_texts.append(content)
-    return all_texts
+            all_docs.append(content)
+    return all_docs
 
 def load_url(url: str) -> list[Document]:
     print("  downloading from URL", url)
-    docs = WebBaseLoader(url).load()
-
-    # Workaround because currently we can only handle text and not documents!
-    docs_list = "\n\n".join(item.page_content for item in docs)
-    return (url, docs_list)
+    docs = [WebBaseLoader(url).load()]
+    docs_list = [item for sublist in docs for item in sublist]
+    return docs_list
 
 
-def chunk_text(text: str, chunk_size=600, overlap=100):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=overlap,
-        separators=["\n\n", "\n", ".", " "]
+def chunk_documents(docs_list: str, chunk_size=600, overlap=100):
+    print("Chunking documents...")
+    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+        chunk_size=chunk_size, chunk_overlap=overlap
     )
-    return splitter.split_text(text)
+    doc_splits = text_splitter.split_documents(docs_list)
+    return doc_splits
 
 
 doc_sources = sys.argv[1::] if len(sys.argv) > 1 else ["docs"]
 all_documents = []
 for doc_src in doc_sources:
 
-    all_texts = []
     if os.path.isdir(doc_src):
         print("importing from", doc_src)
-        all_texts = load_all_texts(doc_src)
+        docs = load_all_texts(doc_src)
+        all_documents.extend(docs)
     elif os.path.isfile(doc_src):
-        all_texts.append(load_file(doc_src, doc_src))
+        all_documents.append(load_file(doc_src, doc_src))
     elif doc_src.startswith("http://") or doc_src.startswith("https://"):
-        all_texts.append(load_url(doc_src))
-
-    for filename, text in all_texts:
-        chunks = chunk_text(text)
-        # Add metadata={'source': filename} to each Document
-        doc_chunks = [Document(page_content=chunk, metadata={'source': filename}) for chunk in chunks]
-        all_documents.extend(doc_chunks)
+        docs = load_url(doc_src)
+        all_documents.extend(docs)
 
 # Ensure data has been loaded
 if not all_documents:
     print("No documents found. Exiting.")
     sys.exit(1)
+
+print("Chunking", len(all_documents), "documents")
+all_documents = chunk_documents(all_documents)
 
 # Use high-quality sentence transformer embeddings
 print("Initializing embedding model")
