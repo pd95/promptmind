@@ -40,7 +40,7 @@ PromptMind is a privacy-friendly, locally running AI knowledge base. It leverage
 3. Run the query app:
 
     ```bash
-    python app.py "What is this project about?"
+    poetry run python scripts/query.py "What is this project about?"
     ```
 
 4. The system will retrieve relevant information using FAISS and generate responses with your local LLM via Ollama.
