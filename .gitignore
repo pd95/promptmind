@@ -6,3 +6,5 @@ docs/*
 
 vector_store/*
 !vector_store/.gitkeep
+
+checkpoints.sqlite*
