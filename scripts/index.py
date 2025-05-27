@@ -9,6 +9,11 @@ from langchain.docstore.document import Document
 from pypdf import PdfReader
 from langchain_community.document_loaders import WebBaseLoader
 
+# Default values
+default_chunk_size = 600
+default_overlap = 100
+default_doc_sources = ["docs"]
+
 def load_pdf_text(path: str) -> str:
     reader = PdfReader(path)
     return "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
@@ -58,7 +63,23 @@ def chunk_documents(docs_list: str, chunk_size=600, overlap=100):
     return doc_splits
 
 
-doc_sources = sys.argv[1::] if len(sys.argv) > 1 else ["docs"]
+# Parse CLI arguments
+doc_sources = []
+chunk_size = default_chunk_size
+overlap = default_overlap
+
+for arg in sys.argv[1:]:
+    if arg.startswith("--chunk_size="):
+        chunk_size = int(arg.split("=", 1)[1])
+    elif arg.startswith("--overlap="):
+        overlap = int(arg.split("=", 1)[1])
+    else:
+        doc_sources.append(arg)
+
+if not doc_sources:
+    doc_sources = default_doc_sources
+
+# Process all documents
 all_documents = []
 for doc_src in doc_sources:
 
@@ -77,8 +98,8 @@ if not all_documents:
     print("No documents found. Exiting.")
     sys.exit(1)
 
-print("Chunking", len(all_documents), "documents")
-all_documents = chunk_documents(all_documents)
+print(f"Chunking {len(all_documents)} documents with chunk_size={chunk_size}, overlap={overlap}")
+all_documents = chunk_documents(all_documents, chunk_size=chunk_size, overlap=overlap)
 
 # Use high-quality sentence transformer embeddings
 print("Initializing embedding model")
