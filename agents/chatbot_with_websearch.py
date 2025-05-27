@@ -9,12 +9,22 @@ from typing import Annotated
 
 from langchain.chat_models import init_chat_model
 from langchain_community.tools import DuckDuckGoSearchResults
-from langchain_core.messages import BaseMessage
 from typing_extensions import TypedDict
 
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
+
+import sys
+
+# Default values
+default_model = "granite3.1-dense:8b"
+
+# Check command line arguments
+model = default_model
+for arg in sys.argv[1:]:
+    if arg.startswith("--model="):
+        model = str(arg.split("=", 1)[1])
 
 
 class State(TypedDict):
@@ -28,7 +38,7 @@ tool = DuckDuckGoSearchResults(output_format="json")
 tools = [tool]
 
 # Initialize LLM with tool support
-llm = init_chat_model("ollama:granite3.1-dense:8b")
+llm = init_chat_model("ollama:"+model)
 llm_with_tools = llm.bind_tools(tools)
 
 def chatbot(state: State):

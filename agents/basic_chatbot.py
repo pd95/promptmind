@@ -10,13 +10,25 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 
+import sys
+
+# Default values
+default_model = "phi4"
+
+# Check command line arguments
+model = default_model
+for arg in sys.argv[1:]:
+    if arg.startswith("--model="):
+        model = str(arg.split("=", 1)[1])
+
+
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
 
 graph_builder = StateGraph(State)
 
-llm = init_chat_model("ollama:phi4")
+llm = init_chat_model("ollama:"+model)
 
 def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
