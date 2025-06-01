@@ -9,15 +9,35 @@ from langchain.docstore.document import Document
 from pypdf import PdfReader
 from langchain_community.document_loaders import WebBaseLoader
 
+from dotenv import load_dotenv 
+from traceloop.sdk import Traceloop
+from traceloop.sdk.decorators import workflow
+from opentelemetry import trace
+
+# Load environment
+if not(load_dotenv(verbose=True)):
+    print("ERROR: .env not found!")
+    exit(1)
+
+# Setup tracing (see .env file and https://traceloop.com/docs/openllmetry/configuration)
+Traceloop.init(
+    app_name="Indexer",   # Specify a custom name. Otherwise sys.argv[0] will be used
+    disable_batch=True,             # Don't batch the telemetry to make it immediately visible
+)
+
+tracer = trace.get_tracer(__name__)
+
 # Default values
 default_chunk_size = 600
 default_overlap = 100
 default_doc_sources = ["docs"]
 
+@workflow(name="load_pdf_text")
 def load_pdf_text(path: str) -> str:
     reader = PdfReader(path)
     return "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
 
+@workflow(name="load_file")
 def load_file(path: str, filename: str) -> Document:
     if filename.lower().endswith(".pdf"):
         # read PDF from path
@@ -38,6 +58,7 @@ def load_file(path: str, filename: str) -> Document:
         return Document(page_content=content, metadata={"source": path})
     return None
 
+@workflow(name="load_all_texts")
 def load_all_texts(folder_path: str) -> list[Document]:
     all_docs = []
     for filename in os.listdir(folder_path):
@@ -47,6 +68,7 @@ def load_all_texts(folder_path: str) -> list[Document]:
             all_docs.append(content)
     return all_docs
 
+@workflow(name="load_url")
 def load_url(url: str) -> list[Document]:
     print("  downloading from URL", url)
     docs = [WebBaseLoader(url).load()]
@@ -54,6 +76,7 @@ def load_url(url: str) -> list[Document]:
     return docs_list
 
 
+@workflow(name="chunk_documents")
 def chunk_documents(docs_list: str, chunk_size=600, overlap=100):
     print("Chunking documents...")
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
@@ -79,33 +102,40 @@ for arg in sys.argv[1:]:
 if not doc_sources:
     doc_sources = default_doc_sources
 
-# Process all documents
-all_documents = []
-for doc_src in doc_sources:
+with tracer.start_as_current_span("Indexer main part") as span:
 
-    if os.path.isdir(doc_src):
-        print("importing from", doc_src)
-        docs = load_all_texts(doc_src)
-        all_documents.extend(docs)
-    elif os.path.isfile(doc_src):
-        all_documents.append(load_file(doc_src, doc_src))
-    elif doc_src.startswith("http://") or doc_src.startswith("https://"):
-        docs = load_url(doc_src)
-        all_documents.extend(docs)
+    # Process all documents
+    span.add_event("Process all documents")
+    all_documents = []
+    for doc_src in doc_sources:
 
-# Ensure data has been loaded
-if not all_documents:
-    print("No documents found. Exiting.")
-    sys.exit(1)
+        if os.path.isdir(doc_src):
+            print("importing from", doc_src)
+            docs = load_all_texts(doc_src)
+            all_documents.extend(docs)
+        elif os.path.isfile(doc_src):
+            all_documents.append(load_file(doc_src, doc_src))
+        elif doc_src.startswith("http://") or doc_src.startswith("https://"):
+            docs = load_url(doc_src)
+            all_documents.extend(docs)
 
-print(f"Chunking {len(all_documents)} documents with chunk_size={chunk_size}, overlap={overlap}")
-all_documents = chunk_documents(all_documents, chunk_size=chunk_size, overlap=overlap)
+    # Ensure data has been loaded
+    if not all_documents:
+        print("No documents found. Exiting.")
+        sys.exit(1)
 
-# Use high-quality sentence transformer embeddings
-print("Initializing embedding model")
-embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    print(f"Chunking {len(all_documents)} documents with chunk_size={chunk_size}, overlap={overlap}")
+    all_documents = chunk_documents(all_documents, chunk_size=chunk_size, overlap=overlap)
 
-# Build the FAISS vector store
-print("Embedding ", len(all_documents), "chunks")
-db = FAISS.from_documents(all_documents, embedding)
-db.save_local("vector_store/")
+    # Use high-quality sentence transformer embeddings
+    print("Initializing embedding model")
+    with tracer.start_as_current_span("Load Embeddings") as span:
+        embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+    # Build the FAISS vector store
+    print("Embedding ", len(all_documents), "chunks")
+    with tracer.start_as_current_span("Vector Store") as span:
+        db = FAISS.from_documents(all_documents, embedding)
+        span.add_event("all documents added")
+        db.save_local("vector_store/")
+        span.add_event("vector_store saved")
