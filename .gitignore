@@ -8,3 +8,8 @@ vector_store/*
 !vector_store/.gitkeep
 
 checkpoints.sqlite*
+
+# Ignore temporary folders
+backup/
+temp/
+tmp/
