@@ -9,7 +9,8 @@ All agent actions and pipeline steps can be traced and observed locally using Op
 
 - Python 3.10+
 - Poetry
-- [Ollama](https://ollama.com/) installed and running locally
+- [Ollama](https://ollama.com/) running locally
+- (Optionally) Docker Desktop running locally (if you want to enable [Observability](#observability))
 
 ### Installation
 
@@ -26,7 +27,8 @@ All agent actions and pipeline steps can be traced and observed locally using Op
     poetry install
     ```
 
-3. Ensure Ollama is running locally and [Phi-4-mini](https://ollama.com/library/phi4-mini) is already downloaded (e.g. running `ollama pull phi4-mini`)
+3. Ensure Ollama is running locally and [Phi-4-mini](https://ollama.com/library/phi4-mini) is already downloaded (e.g. running `ollama pull phi4-mini`).  
+If you want to test/play with `scripts/basic_react_agent.py` you need "granite3.1-dense" (`ollama pull granite3.1-dense`), as other models didn't work well with this "old style ReAct agent script.
 
 ### Usage
 
@@ -107,6 +109,7 @@ The `opentelemetry` folder contains a Docker Compose setup that will spin up:
 ### How to start observability stack
 
 1. Make sure you have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed.
+
 2. In the project root, run:
 
     ```sh
@@ -115,6 +118,12 @@ The `opentelemetry` folder contains a Docker Compose setup that will spin up:
     ```
 
 3. Open the Jaeger UI in your browser: [http://localhost:16686](http://localhost:16686)
+
+4. Enable tracing in `.env` file by setting
+
+       TRACELOOP_TRACING_ENABLED=true
+
+5. Running any script (in "scripts" folder) will now generate traces.
 
 ### How it works
 

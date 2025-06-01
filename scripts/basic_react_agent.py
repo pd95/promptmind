@@ -23,7 +23,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 user_query = sys.argv[1]
-model = sys.argv[2] if len(sys.argv) > 2 else "granite3.1-dense:8b"
+model = sys.argv[2] if len(sys.argv) > 2 else "granite3.1-dense"
 
 
 llm = ChatOllama(model=model)
