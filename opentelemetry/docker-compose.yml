@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  otel-collector:
+    #image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.125.0
+    #image: otel/opentelemetry-collector-contrib:0.99.0
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    networks:
+      - otel
+    depends_on:
+      jaeger:
+        condition: service_started
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    #image: jaegertracing/all-in-one:1.68.0
+    #image: jaegertracing/all-in-one:1.55
+    container_name: jaeger
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "14250:14250"   # Collector gRPC
+    networks:
+      - otel
+
+networks:
+  otel:
