@@ -94,6 +94,39 @@ PromptMind is a privacy-friendly, locally running AI knowledge base. It leverage
 
 ---
 
+## Observability
+
+While developing AI scripts and agents, it is useful to see "what is going on" inside your LLM pipelines.  
+PromptMind includes an [OpenTelemetry](https://opentelemetry.io/) and [Jaeger](https://www.jaegertracing.io/) setup for distributed tracing and observability.
+
+The `opentelemetry` folder contains a Docker Compose setup that will spin up:
+- **OpenTelemetry Collector** (for collecting and exporting traces)
+- **Jaeger UI** (for visualizing traces and spans)
+
+### How to start observability stack
+
+1. Make sure you have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed.
+2. In the project root, run:
+
+    ```sh
+    cd opentelemetry
+    docker compose up -d
+    ```
+
+3. Open the Jaeger UI in your browser: [http://localhost:16686](http://localhost:16686)
+
+### How it works
+
+- The OpenTelemetry Collector receives traces from your Python scripts (if instrumented).
+- Jaeger provides a web UI to search, filter, and visualize traces, which helps you debug and optimize your AI pipelines.
+
+### References
+
+- [OpenTelemetry Documentation](https://opentelemetry.io/docs/)
+- [Jaeger Documentation](https://www.jaegertracing.io/docs/)
+
+---
+
 ## Project Structure
 
 ```
@@ -107,6 +140,9 @@ promptmind/
 │   └── chatbot_with_websearch.py
 ├── docs/
 ├── vector_store/
+├── opentelemetry/
+│   ├── docker-compose.yml
+│   └── otel-collector-config.yml
 ├── pyproject.toml
 └── README.md
 ```
