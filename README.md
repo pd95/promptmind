@@ -1,6 +1,7 @@
 # PromptMind
 
-PromptMind is a privacy-friendly, locally running AI knowledge base. It leverages Retrieval-Augmented Generation (RAG) techniques and integrates with [Ollama](https://ollama.com/), [FAISS](https://faiss.ai/), [LangChain](https://www.langchain.com/), and [LangGraph](https://github.com/langchain-ai/langgraph) to provide a secure, local environment for interacting with Large Language Models (LLMs) without sending your data to the cloud.
+PromptMind is a privacy-friendly, locally running AI knowledge base. It leverages Retrieval-Augmented Generation (RAG) techniques and integrates with [Ollama](https://ollama.com/), [FAISS](https://faiss.ai/), [LangChain](https://www.langchain.com/), and [LangGraph](https://github.com/langchain-ai/langgraph) to provide a secure, local environment for interacting with Large Language Models (LLMs) without sending your data to the cloud.  
+All agent actions and pipeline steps can be traced and observed locally using OpenTelemetry and Jaeger – no data ever leaves your machine.
 
 ## Setup
 
