@@ -152,6 +152,10 @@ promptmind/
 
 This project is licensed under the MIT License.
 
+**Note:**  
+PromptMind relies on several third-party open source components, including but not limited to [Ollama](https://github.com/ollama/ollama), [FAISS](https://github.com/facebookresearch/faiss), [LangChain](https://github.com/langchain-ai/langchain), [LangGraph](https://github.com/langchain-ai/langgraph), [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-python), and [Jaeger](https://github.com/jaegertracing/jaeger).  
+Each of these dependencies is distributed under its own license. Please consult their respective repositories for detailed license information and ensure compliance if you redistribute or modify this project.
+
 ---
 
 **PromptMind**: Your private, local AI knowledge base.
