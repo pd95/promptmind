@@ -2,7 +2,6 @@ import sys
 from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
 
 from dotenv import load_dotenv 
 from traceloop.sdk import Traceloop
