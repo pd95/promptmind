@@ -9,7 +9,13 @@ All agent actions and pipeline steps can be traced and observed locally using Op
 
 - Python 3.10+
 - Poetry
-- [Ollama](https://ollama.com/) running locally
+- [Ollama](https://ollama.com/) running locally with the following models:
+    - [nomic-embed-text](https://ollama.com/library/nomic-embed-text)
+    - [phi4-mini](https://ollama.com/library/phi4-mini)
+    - [granite3.1-dense](https://ollama.com/library/granite3.1-dense)
+
+     You can install each using the command `ollama pull <model>`
+
 - (Optionally) Docker Desktop running locally (if you want to enable [Observability](#observability))
 
 ### Installation
