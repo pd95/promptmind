@@ -3,7 +3,6 @@
 import sys
 import os
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from pypdf import PdfReader
@@ -127,10 +126,8 @@ with tracer.start_as_current_span("Indexer main part") as span:
     print(f"Chunking {len(all_documents)} documents with chunk_size={chunk_size}, overlap={overlap}")
     all_documents = chunk_documents(all_documents, chunk_size=chunk_size, overlap=overlap)
 
-    # Use high-quality sentence transformer embeddings
     print("Initializing embedding model")
-    with tracer.start_as_current_span("Load Embeddings") as span:
-        embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    from embeddings import embedding
 
     # Build the FAISS vector store
     print("Embedding ", len(all_documents), "chunks")

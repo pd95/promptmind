@@ -56,8 +56,9 @@ def generate_rag_response(query: str):
 
 with tracer.start_as_current_span("main part") as span:
     with tracer.start_as_current_span("initialization") as span:
-        with tracer.start_as_current_span("Loading Embeddings") as span:
-            embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        print("Loading Embeddings")
+        from embeddings import embedding
+
         with tracer.start_as_current_span("Loading Vector Store") as span:
             db = FAISS.load_local("vector_store", embedding, allow_dangerous_deserialization=True)
 

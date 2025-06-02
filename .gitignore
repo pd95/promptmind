@@ -9,6 +9,9 @@ vector_store/*
 
 checkpoints.sqlite*
 
+# Ignore python artifacts
+__pycache__
+
 # Ignore temporary folders
 backup/
 temp/
