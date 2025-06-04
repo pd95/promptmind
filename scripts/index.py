@@ -91,10 +91,11 @@ chunk_size = default_chunk_size
 overlap = default_overlap
 
 for arg in sys.argv[1:]:
-    if arg.startswith("--chunk_size="):
-        chunk_size = int(arg.split("=", 1)[1])
-    elif arg.startswith("--overlap="):
-        overlap = int(arg.split("=", 1)[1])
+    if arg.startswith("--"):
+        if arg.startswith("--chunk_size="):
+            chunk_size = int(arg.split("=", 1)[1])
+        elif arg.startswith("--overlap="):
+            overlap = int(arg.split("=", 1)[1])
     else:
         doc_sources.append(arg)
 

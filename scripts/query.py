@@ -23,11 +23,22 @@ tracer = trace.get_tracer(__name__)
 
 # Get query and optional model from command line
 if len(sys.argv) < 2:
-    print("Usage: python scripts/query.py \"<your question>\" [model]")
+    print("Usage: python scripts/query.py [--model=<model name>] \"<your question>\"")
     sys.exit(1)
 
-user_query = sys.argv[1]
-model = sys.argv[2] if len(sys.argv) > 2 else "phi4-mini"
+# Check command line arguments
+model = "phi4-mini"
+user_query = ""
+for arg in sys.argv[1:]:
+    if arg.startswith("--"):
+        if arg.startswith("--model="):
+            model = arg.split("=", 1)[1]
+    elif len(user_query) == 0:
+        user_query = arg
+
+if len(user_query) == 0:
+    print("No query given")
+    exit(1)
 
 @workflow(name="retrieve_documents")
 def retrieve_documents(query: str, top: int = 10):
