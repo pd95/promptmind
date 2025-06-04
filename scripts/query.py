@@ -23,7 +23,7 @@ tracer = trace.get_tracer(__name__)
 
 # Get query and optional model from command line
 if len(sys.argv) < 2:
-    print("Usage: python scripts/query.py [--model=<model name>] \"<your question>\"")
+    print("Usage: python scripts/query.py [--model=<model name>] [--embed-model=<model name>] \"<your question>\"")
     sys.exit(1)
 
 # Check command line arguments
