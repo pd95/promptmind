@@ -70,8 +70,10 @@ def chat_command(settings: Settings) -> None:
 
     embedding = get_embedding(settings)
     db = load_vector_store(embedding)
-    retriever = db.as_retriever(search_kwargs={"k": 5})  # You can set search type/kwargs here
-
+    retriever = db.as_retriever(
+        search_type="similarity_score_threshold",  # or "similarity"
+        search_kwargs={"k": 5, "score_threshold": 0.3}
+    )
     tools = [make_semantic_search_tool(retriever)]
     run_llm = make_run_llm(settings, tools)
 
