@@ -54,6 +54,16 @@ def tool_exists(state: AgentState) -> bool:
     result = state['messages'][-1]
     return hasattr(result, "tool_calls") and result.tool_calls and len(result.tool_calls) > 0
 
+def stream_graph(graph, messages, config):
+    state = {"messages": messages}
+    for s in graph.stream(state, config=config, stream_mode="values"):
+        msg = s["messages"][-1]
+        if hasattr(msg, "pretty_print"):
+            msg.pretty_print()
+        else:
+            print(msg)
+        messages.append(msg)
+
 # 5. Build the LangGraph agent
 def chat_command(settings: Settings) -> None:
     print("Entering agentic chat mode (type 'exit' to quit)...")
@@ -92,13 +102,6 @@ def chat_command(settings: Settings) -> None:
                 print("Exiting chat.")
                 break
             messages.append(HumanMessage(content=user_input))
-            state = {"messages": messages}
-            for s in graph.stream(state, config=config, stream_mode="values"):
-                msg = s["messages"][-1]
-                if hasattr(msg, "pretty_print"):
-                    msg.pretty_print()
-                else:
-                    print(msg)
-                messages.append(msg)
+            stream_graph(graph, messages, config)
     except (KeyboardInterrupt, EOFError):
         print("\nExiting chat.")
