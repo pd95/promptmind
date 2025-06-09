@@ -7,7 +7,7 @@ import argparse
 @dataclass
 class Settings:
     embedding_model: str = "nomic-embed-text"
-    llm_model: str = "phi4-mini"
+    llm_model: str = "llama3.2"
     ollama_url: str = "http://localhost:11434"
     chunk_size: int = 600
     overlap: int = 100

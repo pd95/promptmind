@@ -11,7 +11,7 @@ All agent actions and pipeline steps can be traced and observed locally using Op
 - Poetry
 - [Ollama](https://ollama.com/) running locally with the following models:
     - [nomic-embed-text](https://ollama.com/library/nomic-embed-text)
-    - [phi4-mini](https://ollama.com/library/phi4-mini)
+    - [llama3.2](https://ollama.com/library/llama3.2)
     - [granite3.1-dense](https://ollama.com/library/granite3.1-dense)
 
      You can install each using the command `ollama pull <model>`
@@ -33,7 +33,7 @@ All agent actions and pipeline steps can be traced and observed locally using Op
     poetry install
     ```
 
-3. Ensure Ollama is running locally and [Phi-4-mini](https://ollama.com/library/phi4-mini) is already downloaded (e.g. running `ollama pull phi4-mini`).  
+3. Ensure Ollama is running locally and [llama 3.2](https://ollama.com/library/llama3.2) is already downloaded (e.g. running `ollama pull llama3.2`).  
 If you want to test/play with `scripts/basic_react_agent.py` you need "granite3.1-dense" (`ollama pull granite3.1-dense`), as other models didn't work well with this "old style ReAct agent script.
 
 ### Usage
@@ -56,7 +56,7 @@ If you want to test/play with `scripts/basic_react_agent.py` you need "granite3.
     poetry run python scripts/query.py "<your question>" [model]
     ```
 
-    - By default, the model `phi4-mini` is used.
+    - By default, the model `llama3.2` is used.
     - You can specify a different model as a second argument.
 
 4. **Agents** (interactive chatbots):

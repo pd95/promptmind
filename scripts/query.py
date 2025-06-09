@@ -27,7 +27,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 # Check command line arguments
-model = "phi4-mini"
+model = "llama3.2"
 user_query = ""
 for arg in sys.argv[1:]:
     if arg.startswith("--"):
