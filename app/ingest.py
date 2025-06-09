@@ -11,7 +11,8 @@ def load_pdf_text(path: str) -> str:
     reader = PdfReader(path)
     return "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
 
-def load_file(path: str, filename: str) -> Optional[Document]:
+def load_file(path: str) -> Optional[Document]:
+    filename = os.path.basename(path)
     ext = filename.lower().split('.')[-1]
     if ext == "pdf":
         return Document(page_content=load_pdf_text(path), metadata={"source": path})
@@ -25,7 +26,7 @@ def load_all_texts(folder_path: str) -> List[Document]:
     all_docs: List[Document] = []
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
-        content = load_file(file_path, filename)
+        content = load_file(file_path)
         if content:
             all_docs.append(content)
     return all_docs
