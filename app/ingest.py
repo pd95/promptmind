@@ -3,32 +3,32 @@ from typing import List, Optional
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
-from pypdf import PdfReader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.embeddings import Embeddings
 
-def load_pdf_text(path: str) -> str:
-    reader = PdfReader(path)
-    return "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
+def load_pdf_text(path: str) -> List[Document]:
+    loader = PyPDFLoader(path, mode = "page", extraction_mode="layout")
+    return loader.load()
 
-def load_file(path: str) -> Optional[Document]:
+def load_file(path: str) -> List[Document]:
     filename = os.path.basename(path)
     ext = filename.lower().split('.')[-1]
     if ext == "pdf":
-        return Document(page_content=load_pdf_text(path), metadata={"source": path})
+        return load_pdf_text(path)
     elif ext in ("md", "txt"):
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
-        return Document(page_content=content, metadata={"source": path})
-    return None
+        return [Document(page_content=content, metadata={"source": path})]
+    return []
 
 def load_all_texts(folder_path: str) -> List[Document]:
     all_docs: List[Document] = []
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
-        content = load_file(file_path)
-        if content:
-            all_docs.append(content)
+        contents = load_file(file_path)
+        if contents:
+            all_docs.extend(contents)
     return all_docs
 
 def load_url(url: str) -> List[Document]:
