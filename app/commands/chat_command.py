@@ -2,9 +2,10 @@ from app.settings import Settings
 from app.embeddings import get_embedding
 from app.query import load_vector_store
 from langchain_ollama import ChatOllama
-from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AnyMessage, AIMessageChunk
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END, START
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.message import add_messages
@@ -57,15 +58,30 @@ def tool_exists(state: AgentState) -> bool:
     result = state['messages'][-1]
     return hasattr(result, "tool_calls") and result.tool_calls and len(result.tool_calls) > 0
 
-def stream_graph(graph, messages, config):
+def stream_graph(graph: CompiledStateGraph, messages: List[AnyMessage], config):
+    """"This function invokes the graph with the given messages and configuration and prints incoming chunks!"""
+
     state = {"messages": messages}
-    for s in graph.stream(state, config=config, stream_mode="values"):
-        msg = s["messages"][-1]
-        if hasattr(msg, "pretty_print"):
-            msg.pretty_print()
+
+    print("")
+    for s in graph.stream(state, config=config, stream_mode="messages"):
+        chunk, _ = s
+
+        curr_chunk_type = chunk.type
+        if curr_chunk_type == "AIMessageChunk" and isinstance(chunk, AIMessageChunk):
+            if chunk.tool_calls:
+                print(f"triggering tool call(s) {len(chunk.tool_calls)}: ", chunk.tool_calls)
+            else:
+                print(chunk.content, end = "")
+
+        elif curr_chunk_type == "tool":
+            print(f"------- '{chunk.name}' completed with {chunk.status}: -------\n", chunk.content[:400], "\n-------\n")
+
         else:
-            print(msg)
-        messages.append(msg)
+            print(chunk.type, "********** ??? ********")
+
+        if hasattr(chunk, "response_metadata") and isinstance(chunk.response_metadata, dict) and chunk.response_metadata.get("done"):
+            print("")
 
 # 5. Build the LangGraph agent
 def chat_command(settings: Settings) -> None:
