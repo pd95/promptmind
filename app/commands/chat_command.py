@@ -11,6 +11,7 @@ from langgraph.graph.message import add_messages
 from langchain_core.retrievers import BaseRetriever
 from typing import Annotated, TypedDict, Any, List
 import datetime
+import json
 
 # 1. Define the retrieval tool
 def make_semantic_search_tool(retriever: BaseRetriever):
@@ -21,9 +22,11 @@ def make_semantic_search_tool(retriever: BaseRetriever):
         Returns the sources and relevant content.
         """
         docs = retriever.invoke(query)
-        sources = {doc.metadata.get("source") for doc in docs if "source" in doc.metadata}
-        context = "\n---\n".join(doc.page_content for doc in docs)
-        return f"Sources: {sources}\n\n{context}"
+        result = {
+            "sources": [doc.metadata.get("source", "unknown") for doc in docs],
+            "context": [doc.page_content for doc in docs]
+        }
+        return json.dumps(result)
     return semantic_search
 
 # 2. Prepare the system prompt
