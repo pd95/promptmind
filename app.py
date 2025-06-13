@@ -21,7 +21,7 @@ def main() -> None:
     parser_query = subparsers.add_parser("query", help="Query the knowledge base")
     parser_query.add_argument("prompt", help="Your question")
 
-    args = parser.parse_args(unknown_args)
+    args, unknown_args = parser.parse_known_args(unknown_args)
 
     if args.command == "index":
         index_command(args, settings)
