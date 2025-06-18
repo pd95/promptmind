@@ -1,5 +1,5 @@
 from app.embeddings import get_embedding
-from app.ingest import load_all_texts, load_file, load_url, chunk_documents, build_vector_store
+from app.ingest import load_folder, load_file, load_url, chunk_documents, build_vector_store
 from app.settings import Settings
 import os
 import argparse
@@ -10,7 +10,7 @@ def index_command(args: argparse.Namespace, settings: Settings) -> None:
     for src in args.sources:
         if os.path.isdir(src):
             print(f"Importing from directory: {src}")
-            all_documents.extend(load_all_texts(src))
+            all_documents.extend(load_folder(src))
         elif os.path.isfile(src):
             doc = load_file(src)
             if doc:

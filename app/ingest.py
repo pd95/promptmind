@@ -12,6 +12,7 @@ def load_pdf_text(path: str) -> List[Document]:
     return loader.load()
 
 def load_file(path: str) -> List[Document]:
+    """A helper to extract for each known file type the text into a `Document`"""
     filename = os.path.basename(path)
     ext = filename.lower().split('.')[-1]
     if ext == "pdf":
@@ -22,13 +23,20 @@ def load_file(path: str) -> List[Document]:
         return [Document(page_content=content, metadata={"source": path})]
     return []
 
-def load_all_texts(folder_path: str) -> List[Document]:
+def load_folder(path: str) -> List[Document]:
+    """A helper to extract for each known file type the text into a `Document`"""
     all_docs: List[Document] = []
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        contents = load_file(file_path)
-        if contents:
-            all_docs.extend(contents)
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path):
+            contents = load_file(file_path)
+            if contents:
+                all_docs.extend(contents)
+        elif os.path.isdir(file_path):
+            docs = load_folder(file_path)
+            if len(docs) > 0:
+                all_docs.extend(docs)
+
     return all_docs
 
 def load_url(url: str) -> List[Document]:

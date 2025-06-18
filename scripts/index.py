@@ -38,6 +38,7 @@ def load_pdf_text(path: str) -> str:
 
 @workflow(name="load_file")
 def load_file(path: str, filename: str) -> Document:
+    """A helper to extract for each known file type the text into a `Document`"""
     if filename.lower().endswith(".pdf"):
         # read PDF from path
         print("  reading PDF", path)
@@ -58,13 +59,20 @@ def load_file(path: str, filename: str) -> Document:
     return None
 
 @workflow(name="load_all_texts")
-def load_all_texts(folder_path: str) -> list[Document]:
+def load_folder(path: str) -> list[Document]:
+    """A helper to extract for each known file type the text into a `Document`"""
     all_docs = []
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        content = load_file(file_path, filename)
-        if content:
-            all_docs.append(content)
+    print("importing from", path)
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path):
+            content = load_file(file_path, filename)
+            if content:
+                all_docs.append(content)
+        elif os.path.isdir(file_path):
+            docs = load_folder(file_path)
+            if len(docs) > 0:
+                all_docs.extend(docs)
     return all_docs
 
 @workflow(name="load_url")
@@ -110,9 +118,7 @@ with tracer.start_as_current_span("Indexer main part") as span:
     for doc_src in doc_sources:
 
         if os.path.isdir(doc_src):
-            print("importing from", doc_src)
-            docs = load_all_texts(doc_src)
-            all_documents.extend(docs)
+            all_documents.extend(load_folder(doc_src))
         elif os.path.isfile(doc_src):
             all_documents.append(load_file(doc_src, doc_src))
         elif doc_src.startswith("http://") or doc_src.startswith("https://"):
