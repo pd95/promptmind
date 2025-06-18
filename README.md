@@ -10,9 +10,9 @@ All agent actions and pipeline steps can be traced and observed locally using Op
 - Python 3.10+
 - Poetry
 - [Ollama](https://ollama.com/) running locally with the following models:
-    - [nomic-embed-text](https://ollama.com/library/nomic-embed-text)
-    - [llama3.2](https://ollama.com/library/llama3.2)
-    - [granite3.1-dense](https://ollama.com/library/granite3.1-dense)
+  - [nomic-embed-text](https://ollama.com/library/nomic-embed-text)
+  - [llama3.2](https://ollama.com/library/llama3.2)
+  - [granite3.1-dense](https://ollama.com/library/granite3.1-dense)
 
      You can install each using the command `ollama pull <model>`
 
@@ -109,6 +109,7 @@ While developing AI scripts and agents, it is useful to see "what is going on" i
 PromptMind includes an [OpenTelemetry](https://opentelemetry.io/) and [Jaeger](https://www.jaegertracing.io/) setup for distributed tracing and observability.
 
 The `opentelemetry` folder contains a Docker Compose setup that will spin up:
+
 - **OpenTelemetry Collector** (for collecting and exporting traces)
 - **Jaeger UI** (for visualizing traces and spans)
 
@@ -127,7 +128,9 @@ The `opentelemetry` folder contains a Docker Compose setup that will spin up:
 
 4. Enable tracing in `.env` file by setting
 
-       TRACELOOP_TRACING_ENABLED=true
+    ```sh
+    TRACELOOP_TRACING_ENABLED=true
+    ```
 
 5. Running any script (in "scripts" folder) will now generate traces.
 
@@ -145,7 +148,7 @@ The `opentelemetry` folder contains a Docker Compose setup that will spin up:
 
 ## Project Structure
 
-```
+```tree
 promptmind/
 ├── app.py
 ├── scripts/
